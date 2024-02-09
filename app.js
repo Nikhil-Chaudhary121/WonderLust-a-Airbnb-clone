@@ -10,6 +10,9 @@ const path = require("path");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./util/wrapAsync.js");
 const ExpressError = require("./util/ExpressError.js");
+const {listingSchema ,reviewSchema} = require("./schema.js");
+const Review = require("./models/review.js");
+const review = require("./models/review.js");
 
 
 main().then((res)=>{
@@ -29,6 +32,27 @@ app.use(express.json());
 app.use(methodOverride("_method"))
 app.engine("ejs", ejsMate);
 
+const validateListing = (req, res, next)=>{
+    let {error} = listingSchema.validate(req.body); 
+    if (error) {
+        let errMsg = error.details.map((el) => el.message);
+        console.log(errMsg);
+        throw new ExpressError(400, error);
+    } else {
+        next();
+    }
+}
+
+const validateReview = (req, res, next)=>{
+    let {error} = reviewSchema.validate(req.body); 
+    if (error) {
+        let errMsg = error.details.map((el) => el.message);
+        console.log(errMsg);
+        throw new ExpressError(400, error);
+    } else {
+        next();
+    }
+}
 
 //Root Route
 app.get("/", (req, res)=>{
@@ -48,7 +72,7 @@ app.get("/listings/new", (req, res)=>{
 
 
 // Create Route
-app.post("/listings", wrapAsync(async(req, res, next )=>{
+app.post("/listings",validateListing, wrapAsync(async(req, res, next )=>{
     if (!req.body.listing) {
         next(new ExpressError(400, "Send valid data to listing"))
     }
@@ -59,9 +83,9 @@ app.post("/listings", wrapAsync(async(req, res, next )=>{
 }));
 
 // Show Route
-app.get("/listings/:id",wrapAsync( async (req, res)=>{
+app.get("/listings/:id", wrapAsync( async (req, res)=>{
     let {id} = req.params;
-    let listing = await Listing.findById(id);
+    let listing = await Listing.findById(id).populate("reviews");
     res.render("./listings/show.ejs", {listing});
 }));
 
@@ -74,7 +98,7 @@ app.get("/listings/:id/edit", wrapAsync(async (req, res)=>{
 }));
 
 //Update Route
-app.put("/listings/:id", wrapAsync(async(req, res)=>{
+app.put("/listings/:id",validateListing, wrapAsync(async(req, res)=>{
     if (!req.body.listing) {
         next(new ExpressError(400, "Send valid data to listing"))
     }
@@ -90,6 +114,29 @@ app.delete("/listings/:id", wrapAsync(async(req, res)=>{
     res.redirect("/listings");
 }));
 
+//Review 
+//Post Review Route
+app.post("/listings/:id/reviews",validateReview, wrapAsync(async (req, res)=>{
+    let listing = await Listing.findById(req.params.id);
+    let newReview = new Review(req.body.review);
+    listing.reviews.push(newReview);
+    await listing.save();
+    await newReview.save();
+    console.log("New review saved");
+    res.redirect(`/listings/${listing._id}`);
+}));
+
+//Delete Review Route 
+app.delete("/listings/:id/review/:reviewID", wrapAsync(async(req, res)=>{
+    let {id, reviewID} = req.params;
+    let listing =await Listing.findByIdAndUpdate(id, {$pull : {reviews :reviewID}});
+    console.log(listing);
+    await Review.findByIdAndDelete(reviewID);
+    
+    res.redirect(`/listings/${id}`);
+}))
+
+
 //Error Handling :-
 
 app.all("*",(req, res, next)=>{
@@ -98,7 +145,7 @@ app.all("*",(req, res, next)=>{
 
 app.use((err, req, res, next)=>{
     let {statusCode=500 , message="Something went wrong"} = err;
-    res.render("listings/error.ejs",{message});
+    res.status(statusCode).render("listings/error.ejs",{message});        
     // res.status(statusCode).send(message);
 });
 
