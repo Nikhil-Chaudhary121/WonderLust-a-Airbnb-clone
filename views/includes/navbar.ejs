@@ -1,14 +1,39 @@
 <nav class="navbar navbar-expand-md bg-white border-bottom sticky-top" >
     <div class="container-fluid">
-      <a class="navbar-brand" href="/"><i class="ri-compass-3-line"></i></a>
+      <a class="navbar-brand nav-icon" href="/listings"><i class="ri-compass-3-line"></i></a>
+      <div class="unhide-nav">
+        <a class="nav-link hide-me nav-head nav-text" href="/listings">Explore</a>
+      <form action="/listings/search/" class="d-flex " role="search">
+        <input class="form-control hide-me search-inp me-2" name="country" type="search" placeholder="Search destination" aria-label="Search">
+        <button class="btn hide-me search-btn" type="submit"><i class=" ri-search-line"></i> <span>Search</span></button>
+      </form>
+      </div>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-          <a class="nav-link" href="/">Home</a>
-          <a class="nav-link" href="/listings">All Listings</a>
-          <a class="nav-link" href="/listings/new">Add New Listing</a>
+          <a class="nav-link nav-head nav-text" href="/listings">Explore</a>
+          <div class="search-nav">
+            <div class="container-fluid">
+              <form action="/listings/search/" class="d-flex " role="search">
+                <input class="form-control search-inp me-2" name="country" type="search" placeholder="Search destination" aria-label="Search">
+                <button class="btn search-btn" type="submit"><i class=" ri-search-line"></i> <span>Search</span></button>
+              </form>
+            </div>
+          </div>
+        </div>
+          
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link nav-text " href="/listings/new">Airbnb your home</a>
+          <% if (!currUser) { %>
+            <a class="nav-link" href="/signup"><b>Sign up</b></a>
+            <a class="nav-link" href="/login"><b>Log in</b></a>
+          <% } %>
+          <% if (currUser) { %>
+            <a class="nav-link" href="/logout">Log out</a>
+            <% } %>
+          
         </div>
       </div>
     </div>

@@ -1,3 +1,8 @@
+if(process.env.NODE_ENV != "production") {
+    require("dotenv").config();
+}
+// console.log(process.env);
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -10,9 +15,18 @@ const path = require("path");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./util/wrapAsync.js");
 const ExpressError = require("./util/ExpressError.js");
-const {listingSchema ,reviewSchema} = require("./schema.js");
+const {reviewSchema} = require("./schema.js");
 const Review = require("./models/review.js");
-const review = require("./models/review.js");
+const session = require("express-session");
+const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user");
+
+
+const listingsRouter = require("./routes/listing.js");
+const reviewsRouter = require("./routes/reviews.js");
+const usersRouter = require("./routes/user.js")
 
 
 main().then((res)=>{
@@ -23,6 +37,16 @@ async function main(){
     mongoose.connect(MONGO_KEY);
 }
 
+const sessionOption = {
+    secret : "mysecretcode",
+    resave : false,
+     saveUninitialized : true,
+     cookie: {
+        expires : Date.now() + 7 * 24 * 60 * 60 * 1000,
+        maxAge :  7 * 24 * 60 * 60 * 1000,
+        httpOnly : true,
+     }
+}
 
 app.set("view engine", "ejs");
 app.set("views" , path.join(__dirname ,"views"));
@@ -32,110 +56,38 @@ app.use(express.json());
 app.use(methodOverride("_method"))
 app.engine("ejs", ejsMate);
 
-const validateListing = (req, res, next)=>{
-    let {error} = listingSchema.validate(req.body); 
-    if (error) {
-        let errMsg = error.details.map((el) => el.message);
-        console.log(errMsg);
-        throw new ExpressError(400, error);
-    } else {
-        next();
-    }
-}
 
-const validateReview = (req, res, next)=>{
-    let {error} = reviewSchema.validate(req.body); 
-    if (error) {
-        let errMsg = error.details.map((el) => el.message);
-        console.log(errMsg);
-        throw new ExpressError(400, error);
-    } else {
-        next();
-    }
-}
 
-//Root Route
-app.get("/", (req, res)=>{
-    res.send("working")
+app.use(session(sessionOption));
+app.use(flash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
+app.use((req, res, next)=>{
+    res.locals.successMsg = req.flash("success");
+    res.locals.errorMsg = req.flash("error");
+    res.locals.currUser = req.user;
+    next();
 })
 
-// Show All Listing  Route
-app.get("/listings", wrapAsync(async(req, res)=>{
-    const listings = await Listing.find();
-    res.render("./listings/index.ejs", {listings});
-}));
+// app.get("/demouser", async(req, res)=>{
+//     let fakeUser = new User({
+//         email : "nikhil@gmail.com",
+//         username : "nikhil-chaudhary"
+//     });
+//     let registeredUser = await User.register(fakeUser , "helloworld");
+//     res.send(registeredUser);
+// })
 
-// New Form Route
-app.get("/listings/new", (req, res)=>{
-    res.render("./listings/new.ejs");
-})
-
-
-// Create Route
-app.post("/listings",validateListing, wrapAsync(async(req, res, next )=>{
-    if (!req.body.listing) {
-        next(new ExpressError(400, "Send valid data to listing"))
-    }
-    let listing = new Listing(req.body.listing);
-    await listing.save();
-    console.log(listing);
-    res.redirect("/listings")
-}));
-
-// Show Route
-app.get("/listings/:id", wrapAsync( async (req, res)=>{
-    let {id} = req.params;
-    let listing = await Listing.findById(id).populate("reviews");
-    res.render("./listings/show.ejs", {listing});
-}));
-
-//Edit Rout
-app.get("/listings/:id/edit", wrapAsync(async (req, res)=>{
-    let {id} = req.params;
-    let listing = await Listing.findById(id);
-    console.log(listing);
-    res.render("./listings/edit.ejs",{listing});
-}));
-
-//Update Route
-app.put("/listings/:id",validateListing, wrapAsync(async(req, res)=>{
-    if (!req.body.listing) {
-        next(new ExpressError(400, "Send valid data to listing"))
-    }
-    let {id} =req.params;
-    let listing = await Listing.findByIdAndUpdate(id , {...req.body.listing}, {runValidators : true , new : true});
-    res.redirect("/listings");
-}));
-
-//Delete Route
-app.delete("/listings/:id", wrapAsync(async(req, res)=>{
-    let {id} = req.params;
-    let deletedData = await Listing.findByIdAndDelete(id); 
-    res.redirect("/listings");
-}));
-
-//Review 
-//Post Review Route
-app.post("/listings/:id/reviews",validateReview, wrapAsync(async (req, res)=>{
-    let listing = await Listing.findById(req.params.id);
-    let newReview = new Review(req.body.review);
-    listing.reviews.push(newReview);
-    await listing.save();
-    await newReview.save();
-    console.log("New review saved");
-    res.redirect(`/listings/${listing._id}`);
-}));
-
-//Delete Review Route 
-app.delete("/listings/:id/review/:reviewID", wrapAsync(async(req, res)=>{
-    let {id, reviewID} = req.params;
-    let listing =await Listing.findByIdAndUpdate(id, {$pull : {reviews :reviewID}});
-    console.log(listing);
-    await Review.findByIdAndDelete(reviewID);
-    
-    res.redirect(`/listings/${id}`);
-}))
-
+app.use("/listings", listingsRouter);
+app.use("/listings/:id/review", reviewsRouter);
+app.use("/", usersRouter);
 
 //Error Handling :-
 

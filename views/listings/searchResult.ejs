@@ -1,0 +1,155 @@
+<% layout("/layouts/boilerplate.ejs") %>
+<body>
+    <style>
+        .sec-nav{
+            position: relative;
+            padding-top: 1rem;
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #filters{
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 2rem;
+            text-align: center;
+            align-items: center;
+            background-color: #fff;
+            padding: 0 1rem;
+        }
+        #filters a{
+            text-decoration: none;
+            color: black;
+        }
+        .filter{
+            opacity: 0.7;
+        }
+        .filter:hover{
+            opacity: 1;
+        }
+        .filter p{
+            font-size: 0.8rem;
+        }
+        .hide-me{
+            display: none;
+        }
+        .tax-toggle{
+            position: absolute;
+            right: 0;
+            border: 1px solid black;
+            border-radius: 1rem;
+            height: 3.25rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            background-color: #fff;
+        }
+    </style>
+    <body>
+        <!-- <h3>All Listings</h3> -->
+        <!-- <form method="get" action="/listings/new">
+            <button>Create New Listing</button>
+        </form> -->
+        <div class="sec-nav">
+            <div id="filters" >
+                <a href="/listings/category/trending">
+                <div class="filter mt-3">
+                    <div><i class="ri-fire-fill"></i></div>
+                    <p>Trending</p>
+                </div>
+                </a>
+                <a href="/listings/category/rooms">
+                <div class="filter mt-3">
+                    <div><i class="ri-hotel-bed-fill"></i></div>
+                    <p>Rooms</p>
+                </div>
+                </a>
+                <a href="/listings/category/iconiccities">
+                <div class="filter mt-3">
+                    <div><i class="ri-building-fill"></i></i></div>
+                    <p>Iconic Cities</p>
+                </div>
+                </a>
+                <a href="/listings/category/castle">
+                <div class="filter mt-3">
+                    <div><i class="ri-ancient-gate-fill"></i></div>
+                    <p>Castle</p>
+                </div>
+                </a>
+                <a href="/listings/category/camping">
+                <div class="filter mt-3">
+                    <div><i class="ri-tent-fill"></i></div>
+                    <p>Camping</p>
+                </div>
+                </a>
+                <a href="/listings/category/arctic">
+                <div class="filter mt-3">
+                    <div><i class="ri-snowy-fill"></i></div>
+                    <p>Arctic</p>
+                </div>
+                </a>
+                <a href="/listings/category/amazingview">
+                <div class="filter mt-3">
+                    <div><i class="ri-rainbow-fill"></i></div>
+                    <p>Amazing views</p>
+                </div>
+                </a>
+                <a href="/listings/category/cabins">
+                <div class="filter mt-3">
+                    <div><i class="ri-home-office-fill"></i></div>
+                    <p>Cabins</p>
+                </div>
+                </a>
+                <a href="/listings/category/surfing">
+                <div class="filter mt-3">
+                    <div><i class="ri-sailboat-line"></i></div>
+                    <p>Surfing</p>
+                </div>
+                </a>
+            </a>
+            <a href="/listings/category/restaurant">
+            <div class="filter mt-3">
+                <div><i class="ri-restaurant-line"></i></div>
+                <p>Restaurant</p>
+            </div>
+            </a>    
+            </div>
+            <div class="tax-toggle">
+                <div class="form-check-reverse form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                    <label class="form-check-label" for="flexSwitchCheckDefault">Display total after taxes</label>
+                  </div>
+            </div>   
+        </div>
+            <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 row-cols-1 mt-3">
+                <% for(listing of listings){ %>
+                    <a href="/listings/<%= listing._id %>">
+                    <div class="card col listing-card">
+                        <img src="<%= listing.image.url %>" class="card-img-top" style="height: 20rem;" alt="...">
+                        <div class="card-img-overlay"></div>
+                        <div class="card-body">
+                            <p class="card-text"><%= listing.title %></p>
+                            <p class="card-text">&#8377;<%= listing.price.toLocaleString("en-IN")%> /night
+                                <i class="card-text tax-info hide-me">&nbsp;&nbsp; + 18% GST</i>
+                            </p>
+                        </div>    
+                    </div>
+                    </a>
+                    <% } %>
+            </div>
+    
+    <script>
+        let taxSwitch = document.getElementById("flexSwitchCheckDefault");
+        taxSwitch.addEventListener("click", ()=>{
+            let taxInfo = document.getElementsByClassName("tax-info");
+            for(let info of taxInfo){
+                info.classList.toggle("hide-me"); 
+            }
+        })
+    </script>
+    
+    </body>
+    
+    

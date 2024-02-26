@@ -11,13 +11,16 @@ body{
 }
 .navbar{
     height: 5rem !important;
+    position: relative;
 }
 
 .navbar-brand{
-    font-size: 2rem !important;
+    font-size: 2.7rem !important;
     color: #fe424d !important;
 }
-
+.nav-text{
+    font-weight: 500 !important;
+}
 .nav-link{
     color: #222222 !important;
 }
@@ -110,4 +113,102 @@ a{
     display: flex;
     justify-content: end;
     gap: 2rem;
+}
+.search-nav{
+    position: absolute;
+    left: 50%;
+    transform: translate(-75%, 0);
+}
+.search-inp{
+    border-radius: 25px !important;
+    padding: 0.5rem 3rem !important;
+
+}
+.search-btn{
+    background-color: #fe424d !important;
+    color: #fff !important;
+    border-radius: 25px !important;
+    padding: 0 1rem !important;
+    gap: 0.6rem;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}
+
+.sec-nav{
+    position: relative !important;
+    padding-top: 1rem !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+#filters{
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 2rem !important ;
+    text-align: center !important;
+    align-items: center !important;
+    align-items: center !important;
+    background-color: #fff ; 
+    align-items: center !important;
+    padding: 0 1rem  ;
+}
+#filters a{
+    text-decoration: none !important;
+    color: black !important;
+}
+.filter{
+    opacity: 0.7 !important;
+}
+.filter:hover{
+    opacity: 1 !important;
+}
+.filter p{
+    font-size: 0.8rem !important;
+}
+.hide-me{
+    display: none !important;
+}
+.tax-toggle{
+    position: absolute !important ;
+    right: 0 !important;
+    border: 1px solid black !important;
+    border-radius: 1rem !important;
+    height: 3.25rem !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 1rem !important;
+    background-color: #fff !important;
+}
+
+@media (max-width : 1200px) {
+    .listingcontainer{
+        display: none !important;
+    }
+    .sec-nav{
+        display: none !important;
+    }
+}
+@media (max-width : 1100px) {
+    .search-inp{
+        padding: 0.5rem 0 0.5rem 2rem !important;
+    }
+    .search-btn span{
+        display: none;
+    }
+}
+@media (max-width : 767px) {
+    .nav-head, .container-fluid{
+        display: none;
+    }
+    .hide-me{
+        display: initial !important;
+    }
+    .unhide-nav{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 }
