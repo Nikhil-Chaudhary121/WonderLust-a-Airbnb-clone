@@ -10,7 +10,7 @@ const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const port = 8080;
 
-const MONGO_KEY = "mongodb://127.0.0.1:27017/wanderlust";
+// const MONGO_KEY = "mongodb://127.0.0.1:27017/wanderlust";
 const dbUrl = process.env.ATLASDB_URL ;
 
 const path = require("path");
