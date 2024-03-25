@@ -1,22 +1,22 @@
+const dotenv = require("dotenv");
 if(process.env.NODE_ENV != "production") {
     require("dotenv").config();
 }
-// console.log(process.env);
+require("dotenv").config();
 
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const port = 8080;
-const Listing = require("./models/listing");
-const data = require("./init/data");
+
 const MONGO_KEY = "mongodb://127.0.0.1:27017/wanderlust";
+const dbUrl = process.env.ATLASDB_URL ;
+
 const path = require("path");
 const ejsMate = require("ejs-mate");
-const wrapAsync = require("./util/wrapAsync.js");
+
 const ExpressError = require("./util/ExpressError.js");
-const {reviewSchema} = require("./schema.js");
-const Review = require("./models/review.js");
 const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
@@ -34,7 +34,7 @@ main().then((res)=>{
 }).catch(err => console.log(err));
 
 async function main(){
-    mongoose.connect(MONGO_KEY);
+    await mongoose.connect(dbUrl);
 }
 
 const sessionOption = {
@@ -61,6 +61,7 @@ app.engine("ejs", ejsMate);
 app.use(session(sessionOption));
 app.use(flash());
 
+// passport 
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
@@ -68,7 +69,7 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-
+// Flash Message
 app.use((req, res, next)=>{
     res.locals.successMsg = req.flash("success");
     res.locals.errorMsg = req.flash("error");
@@ -76,14 +77,6 @@ app.use((req, res, next)=>{
     next();
 })
 
-// app.get("/demouser", async(req, res)=>{
-//     let fakeUser = new User({
-//         email : "nikhil@gmail.com",
-//         username : "nikhil-chaudhary"
-//     });
-//     let registeredUser = await User.register(fakeUser , "helloworld");
-//     res.send(registeredUser);
-// })
 
 app.use("/listings", listingsRouter);
 app.use("/listings/:id/review", reviewsRouter);
@@ -91,10 +84,12 @@ app.use("/", usersRouter);
 
 //Error Handling :-
 
+//Page Not Found 
 app.all("*",(req, res, next)=>{
     next(new ExpressError(404, "Page Not Found"));
 });
 
+// Handling Error Messages
 app.use((err, req, res, next)=>{
     let {statusCode=500 , message="Something went wrong"} = err;
     res.status(statusCode).render("listings/error.ejs",{message});        
