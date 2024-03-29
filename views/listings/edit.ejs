@@ -1,7 +1,7 @@
 <% layout("/layouts/boilerplate.ejs") %>
 <body>
     <div class="row ">
-        <div class=" col col-md-8 offset-md-2 offset-1">
+        <div class=" col col-md-8 offset-md-2 col-sm-10 offset-sm-1 offset-1 col-10">
             <h3 class="mt-3">Edit your Listing</h3>
             <form method="post" enctype="multipart/form-data" action="/listings/<%= listing.id %>?_method=PUT" novalidate class="needs-validation">       
                 <div class="mb-3">
