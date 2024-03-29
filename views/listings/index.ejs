@@ -81,7 +81,7 @@
                     <div class="card-body">
                         <p class="card-text"><%= listing.title %></p>
                         <p class="card-text">&#8377;<%= listing.price.toLocaleString("en-IN")%> /night
-                            <i class="card-text tax-info hide-me">&nbsp;&nbsp; + 18% GST</i>
+                            <i class="card-text tax-info gst-txt">&nbsp;&nbsp; + 18% GST</i>
                         </p>
                     </div>    
                 </div>
@@ -94,7 +94,7 @@
     taxSwitch.addEventListener("click", ()=>{
         let taxInfo = document.getElementsByClassName("tax-info");
         for(let info of taxInfo){
-            info.classList.toggle("hide-me"); 
+            info.classList.toggle("gst-txt"); 
         }
     })
 </script>
